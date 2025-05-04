@@ -45,6 +45,7 @@ def mark_topic_used(topics, idx):
         writer.writerows(topics)
 
 def generate_post(topic, category):
+    import openai
     openai.api_key = OPENAI_API_KEY
     prompt = (
         f"Сгенерируй короткий, интересный и необычный факт на тему: '{topic}' (категория: {category}). "
@@ -53,7 +54,8 @@ def generate_post(topic, category):
         "Знаете ли вы, что у осьминога три сердца, и два из них перестают биться, когда он плывёт?\n"
         "Ещё один факт:"
     )
-    response = openai.ChatCompletion.create(
+    client = openai.OpenAI(api_key=OPENAI_API_KEY)
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=120,
