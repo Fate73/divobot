@@ -8,6 +8,7 @@ from telegram import Bot
 # Получаем переменные из окружения
 TOKEN = os.getenv('TOKEN')
 USER_ID = os.getenv('USER_ID')
+HF_TOKEN = os.getenv('HF_TOKEN')
 
 # Настройки
 CSV_FILE = "topic.csv"
@@ -56,20 +57,31 @@ def generate_post(topic, category):
         "Пиши в стиле познавательной заметки для Telegram-канала, избегай банальностей. Ещё один факт:"
     )
 
-    url = "https://dream.deeppavlov.ai/api/v1/generate"
-    data = {
-        "prompt": prompt,
-        "num_beams": 1,
-        "do_sample": True,
-        "max_new_tokens": 120,
-        "repetition_penalty": 1.2,
-        "top_p": 0.9,
-        "temperature": 1.0,
+    url = "https://api-inference.huggingface.co/models/sberbank-ai/rugpt3large_based_on_gpt2"
+    headers = {
+        "Authorization": f"Bearer {HF_TOKEN}",
+        "Content-Type": "application/json"
     }
-    response = requests.post(url, json=data, timeout=30)
+    data = {
+        "inputs": prompt,
+        "parameters": {
+            "max_new_tokens": 120,
+            "do_sample": True,
+            "temperature": 1.0,
+            "top_p": 0.9,
+            "repetition_penalty": 1.2,
+        }
+    }
+    response = requests.post(url, headers=headers, json=data, timeout=60)
     response.raise_for_status()
     result = response.json()
-    return result["generated_text"].strip()
+    # HuggingFace может возвращать результат по-разному, обработаем оба варианта:
+    if isinstance(result, list) and "generated_text" in result[0]:
+        return result[0]["generated_text"].strip()
+    elif isinstance(result, dict) and "generated_text" in result:
+        return result["generated_text"].strip()
+    else:
+        return str(result)
 
 def main():
     next_row, topics, idx = get_next_topic()
