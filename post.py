@@ -57,7 +57,7 @@ def generate_post(topic, category):
         "Пиши в стиле познавательной заметки для Telegram-канала, избегай банальностей. Ещё один факт:"
     )
 
-    url = "https://api-inference.huggingface.co/models/sberbank-ai/rugpt3large_based_on_gpt2"
+    url = "https://api-inference.huggingface.co/models/cointegrated/rugpt3large_based_on_gpt2"
     headers = {
         "Authorization": f"Bearer {HF_TOKEN}",
         "Content-Type": "application/json"
